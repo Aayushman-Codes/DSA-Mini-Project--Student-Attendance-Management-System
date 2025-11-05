@@ -578,7 +578,7 @@ void mainMenu(void) {
         printf(" 18. EXIT\n");
         printf("==================================================\n");
 
-        int choice = readIntRange("Enter your choice (1-19): ", 1, 19);
+        int choice = readIntRange("Enter your choice (1-18): ", 1, 18);
         switch (choice) {
             case 1: {
                 int roll = readInt("Enter roll number: ");
