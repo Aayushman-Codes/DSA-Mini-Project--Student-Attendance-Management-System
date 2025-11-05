@@ -13,10 +13,6 @@ It demonstrates the use of **Linked Lists**, **Circular Queues**, **Stacks**, an
 - [Menu Options](#menu-options)
 - [Compilation and Execution](#compilation-and-execution)
 - [Input Validation](#input-validation)
-- [Memory Management](#memory-management)
-- [Example Output](#example-output)
-- [Project Summary](#project-summary)
-- [Author](#author)
 
 ---
 
