@@ -143,7 +143,8 @@ This project maintains two major versions to show the evolution from a single-fi
 Each version is stored as a **Git tag**:
 
 - `v1` → Old single-file implementation  
-- `v2` → Modular 6-file project  
+- `v2` → Modular 6-file project
+- `v4` → Updated files and made required changes   
 
 You can switch between them on GitHub by navigating to:
 
