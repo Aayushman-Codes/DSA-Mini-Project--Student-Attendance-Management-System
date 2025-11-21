@@ -1,5 +1,5 @@
 #include "attendance.h"
-
+//version 3
 void displayMainMenu(void) {
     printf("\n==============================================================\n");
     printf("           STUDENT ATTENDANCE MANAGEMENT SYSTEM\n");
@@ -31,11 +31,11 @@ void mainMenu(void) {
         printf(" 11. GENERATE Defaulter List\n");
         printf(" 12. DISPLAY Defaulter List\n");
         printf("\n BINARY SEARCH TREE (BST)\n");
-        printf(" 13. BUILD BST\n");
-        printf(" 14. DISPLAY BST (In-order)\n");
-        printf(" 15. FAST Student Search (BST by Roll)\n");
-        printf(" 16. DISPLAY Min & Max Attendance (BST)\n");
-        printf(" 17. DISPLAY Range by Roll (BST)\n");
+        printf(" 13. Organize Data for Faster Searching\n");
+        printf(" 14. Show All Students (Sorted by Roll Number)\n");
+        printf(" 15. Fast Search Student by Roll Number\n");
+        printf(" 16. Show Student with Lowest & Highest Attendance\n");
+        printf(" 17. Show Students Between Two Roll Numbers\n");
         printf("\n MISC\n");
         printf(" 18. EXIT\n");
         printf("==================================================\n");
@@ -43,23 +43,21 @@ void mainMenu(void) {
         int choice = readIntRange("Enter your choice (1-18): ", 1, 18);
         switch (choice) {
             case 1: {
-                int roll = readInt("Enter roll number: ");
+                int roll = validateRollPrompt("Enter roll number to add: ");
                 char name[50];
                 readNameAlpha("Enter name (letters only, no spaces): ", name, sizeof(name));
                 insertStudent(roll, name);
             } break;
 
             case 2: {
-                // show current list before deletion
-                printf("\n--- Current Student List ---\n");
+                printf("\n--- Before Delete ---\n");
                 displayStudents();
-
-                int roll = readInt("Enter roll number to delete: ");
+                int roll = validateRollPrompt("Enter roll number to delete: ");
                 deleteStudent(roll);
             } break;
 
             case 3: {
-                int roll = readInt("Enter roll number to search: ");
+                int roll = validateRollPrompt("Enter roll number to search: ");
                 Student* s = searchStudent(roll);
                 if (s) {
                     printf("\nFOUND via Linked List:\n");
@@ -71,65 +69,30 @@ void mainMenu(void) {
                 }
             } break;
 
-            case 4:
-                displayStudents();
-                break;
+            case 4: displayStudents(); break;
+            case 5: modifyStudentDetails(); break;
 
-            case 5: {
-                // show current list before modification
-                printf("\n--- Current Student List ---\n");
-                displayStudents();
+            case 6: addDayAttendance(); break;
+            case 7: displayAttendanceRecords(); break;
+            case 8: displayStudentAttendance(); break;
 
-                modifyStudentDetails();
-            } break;
-
-            case 6:
-                addDayAttendance();
-                break;
-
-            case 7:
-                displayAttendanceRecords();
-                break;
-
-            case 8:
-                displayStudentAttendance();
-                break;
-
-            case 9:
-                modifyAttendanceSingle();
-                break;
-
-            case 10:
-                modifyAttendanceDay();
-                break;
+            case 9: modifyAttendanceSingle(); break;
+            case 10: modifyAttendanceDay(); break;
 
             case 11: {
-                if (aq.count == 0) {
-                    printf("No attendance recorded yet.\n");
-                    break;
-                }
+                if (aq.count == 0) { printf("No attendance recorded yet.\n"); break; }
                 int req = readIntRange("Enter required attendance threshold (in days): ", 0, aq.count);
                 generateDefaulterList(req);
             } break;
 
-            case 12:
-                displayDefaulterList();
-                break;
+            case 12: displayDefaulterList(); break;
 
-            case 13:
-                buildBSTFromList();
-                break;
-
-            case 14:
-                displayBST();
-                break;
+            case 13: buildBSTFromList(); break;
+            case 14: displayBST(); break;
 
             case 15: {
-                if (!bstRoot) {
-                    printf("BST not built yet. Build BST first.\n");
-                    break;
-                }
-                int roll = readInt("Enter roll number to search (BST): ");
+                if (!bstRoot) { printf("BST not built yet. Build BST first.\n"); break; }
+                int roll = validateRollPrompt("Enter roll number to search (BST): ");
                 BSTNode* r = searchBST(bstRoot, roll);
                 if (r) {
                     printf("\nFOUND via BST Search:\n");
@@ -141,14 +104,8 @@ void mainMenu(void) {
                 }
             } break;
 
-            case 16:
-                displayMinMaxAttendanceBST();
-                break;
-
-            case 17:
-                displayRangeByRollBST();
-                break;
-
+            case 16: displayMinMaxAttendanceBST(); break;
+            case 17: displayRangeByRollBST(); break;
             case 18:
                 freeBST(bstRoot);
                 freeAllMemory();

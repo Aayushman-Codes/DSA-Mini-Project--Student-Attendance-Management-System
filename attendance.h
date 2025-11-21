@@ -7,11 +7,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+/* CONFIG */
 #define MAX_DAYS 30
-#define MAX_DEFAULTERS 100
 #define MAX_STUDENTS 100
+#define MAX_DEFAULTERS 100
 
-/* ===================== STRUCTURES ===================== */
+/* STRUCTS */
 
 typedef struct Student {
     int rollNumber;
@@ -52,45 +53,59 @@ typedef struct BSTNode {
     struct BSTNode* right;
 } BSTNode;
 
-/* ===================== GLOBAL VARIABLES ===================== */
+/* GLOBALS */
 extern Student* head;
 extern AttendanceQueue aq;
 extern DefaulterStack ds;
 extern BSTNode* bstRoot;
 
-/* ===================== LINKED LIST ===================== */
+/* UTILS / INPUT */
 void clearInput(void);
 int readInt(const char* prompt);
 int readIntRange(const char* prompt, int minV, int maxV);
 int read01(const char* prompt);
 void readNameAlpha(const char* prompt, char* out, size_t outsz);
+
+/* Re-prompting roll validator (keeps asking until roll > 0) */
+int validateRollPrompt(const char* prompt);
+
+/* LINKED LIST */
+void displayStudents(void);
 void insertStudent(int roll, const char* name);
 bool deleteStudent(int roll);
 Student* searchStudent(int roll);
-void displayStudents(void);
 void modifyStudentDetails(void);
 void freeAllMemory(void);
 
-/* ===================== QUEUE ===================== */
+/* QUEUE (ATTENDANCE) */
 void initAttendanceQueue(void);
+bool isQueueFull(void);
+bool isQueueEmpty(void);
 void addDayAttendance(void);
 void displayAttendanceRecords(void);
-void modifyAttendanceSingle(void);
-void modifyAttendanceDay(void);
 int calculateStudentAttendance(int roll);
 void displayStudentAttendance(void);
+void modifyAttendanceDay(void);
+void modifyAttendanceSingle(void);
 
-/* ===================== STACK ===================== */
+/* STACK (DEFAULTERS) */
 void initDefaulterStack(void);
+bool isStackFull(void);
+bool isStackEmpty(void);
+void pushDefaulter(int roll, const char* name, int attendance, int required);
+Defaulter popDefaulter(void);
 void generateDefaulterList(int req);
 void displayDefaulterList(void);
 
-/* ===================== BST ===================== */
+/* BST */
+BSTNode* createBSTNode(int roll, const char* name, int attendance);
+BSTNode* insertBST(BSTNode* root, int roll, const char* name, int attendance);
+BSTNode* searchBST(BSTNode* root, int roll);
 void buildBSTFromList(void);
+void inorderBST(BSTNode* root);
 void displayBST(void);
 void displayMinMaxAttendanceBST(void);
 void displayRangeByRollBST(void);
-BSTNode* searchBST(BSTNode* root, int roll);
-void freeBST(BSTNode* r);
+void freeBST(BSTNode* root);
 
-#endif
+#endif /* ATTENDANCE_H */

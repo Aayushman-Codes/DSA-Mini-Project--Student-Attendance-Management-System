@@ -1,164 +1,102 @@
 #include "attendance.h"
 
-/* ===================== UTILITY FUNCTIONS ===================== */
-
-void clearInput(void) {
-    int ch;
-    while ((ch = getchar()) != '\n' && ch != EOF) {}
-}
-
-int readInt(const char* prompt) {
-    int x;
-    while (1) {
-        printf("%s", prompt);
-        if (scanf("%d", &x) == 1) {
-            clearInput();
-            return x;
-        }
-        printf("Invalid input! Please enter an integer value.\n");
-        clearInput();
-    }
-}
-
-int readIntRange(const char* prompt, int minV, int maxV) {
-    int x;
-    while (1) {
-        x = readInt(prompt);
-        if (x < minV || x > maxV)
-            printf("Please enter a value between %d and %d.\n", minV, maxV);
-        else
-            return x;
-    }
-}
-
-int read01(const char* prompt) {
-    int x;
-    while (1) {
-        printf("%s", prompt);
-        if (scanf("%d", &x) == 1 && (x == 0 || x == 1)) {
-            clearInput();
-            return x;
-        }
-        printf("Invalid input! Enter only 1 or 0.\n");
-        clearInput();
-    }
-}
-
-void readNameAlpha(const char* prompt, char* out, size_t outsz) {
-    while (1) {
-        printf("%s", prompt);
-        if (scanf("%49s", out) != 1) {
-            clearInput();
-            continue;
-        }
-        clearInput();
-
-        int ok = 1;
-        for (size_t i = 0; out[i]; ++i)
-            if (!isalpha((unsigned char)out[i])) ok = 0;
-
-        if (!ok) {
-            printf("Error: Name must contain only alphabets (A–Z/a–z).\n");
-            continue;
-        }
-        if (strlen(out) == 0) {
-            printf("Error: Name cannot be empty.\n");
-            continue;
-        }
-        return;
-    }
-}
-
-/* ===================== LINKED LIST FUNCTIONS ===================== */
-
+/* Display list */
 void displayStudents(void) {
     if (!head) {
         printf("\nNo students in record.\n");
         return;
     }
-
     printf("\n=== STUDENT RECORDS (Linked List) ===\n");
-    printf("----------------------------------------\n");
     printf(" Roll No | Name\n");
     printf("---------|----------------------\n");
-
-    for (Student* c = head; c; c = c->next)
+    for (Student* c = head; c; c = c->next) {
         printf(" %7d | %-20s\n", c->rollNumber, c->name);
+    }
 }
 
-/* Add Student */
+/* Insert (expects valid roll supplied by caller) */
 void insertStudent(int roll, const char* name) {
-    printf("\n--- Current Student List (Before Add) ---\n");
+    /* Show before-insert list */
+    printf("\n--- Before Insert ---\n");
     displayStudents();
 
     Student* s = (Student*)malloc(sizeof(Student));
+    if (!s) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
     s->rollNumber = roll;
-    strcpy(s->name, name);
+    strncpy(s->name, name, sizeof(s->name)-1);
+    s->name[sizeof(s->name)-1] = '\0';
     s->next = NULL;
 
     if (!head || roll < head->rollNumber) {
+        /* check duplicate with head */
+        if (head && head->rollNumber == roll) {
+            printf("Error: Roll %d already exists.\n", roll);
+            free(s);
+            return;
+        }
         s->next = head;
         head = s;
         printf("\nStudent %s (Roll %d) added successfully.\n", name, roll);
-        printf("\n--- Updated Student List (After Add) ---\n");
+        printf("\n--- After Insert ---\n");
         displayStudents();
         return;
     }
 
     Student* cur = head;
-    while (cur->next && cur->next->rollNumber < roll)
-        cur = cur->next;
+    while (cur->next && cur->next->rollNumber < roll) cur = cur->next;
 
     if ((cur->next && cur->next->rollNumber == roll) || cur->rollNumber == roll) {
-        printf("Error: Roll number %d already exists!\n", roll);
+        printf("Error: Roll %d already exists.\n", roll);
         free(s);
         return;
     }
 
     s->next = cur->next;
     cur->next = s;
+
     printf("\nStudent %s (Roll %d) added successfully.\n", name, roll);
-    printf("\n--- Updated Student List (After Add) ---\n");
+    printf("\n--- After Insert ---\n");
     displayStudents();
 }
 
-/* Delete Student */
+/* Delete student (roll provided by caller and validated there) */
 bool deleteStudent(int roll) {
-
     if (!head) {
         printf("No students in record.\n");
         return false;
     }
 
     if (head->rollNumber == roll) {
-        Student* temp = head;
+        Student* t = head;
         head = head->next;
-        free(temp);
+        free(t);
         printf("\nStudent (Roll %d) deleted successfully.\n", roll);
-        printf("\n--- Updated Student List (After Delete) ---\n");
+        printf("\n--- After Delete ---\n");
         displayStudents();
         return true;
     }
 
     Student* cur = head;
-    while (cur->next && cur->next->rollNumber != roll)
-        cur = cur->next;
+    while (cur->next && cur->next->rollNumber != roll) cur = cur->next;
 
     if (!cur->next) {
-        printf("Student with roll number %d not found.\n", roll);
+        printf("Student with roll %d not found.\n", roll);
         return false;
     }
 
-    Student* temp = cur->next;
-    cur->next = temp->next;
-    free(temp);
+    Student* t = cur->next;
+    cur->next = t->next;
+    free(t);
     printf("\nStudent (Roll %d) deleted successfully.\n", roll);
-    printf("\n--- Updated Student List (After Delete) ---\n");
+    printf("\n--- After Delete ---\n");
     displayStudents();
     return true;
 }
 
-/* Search Student */
+/* Search (returns pointer or NULL). Caller can call validateRollPrompt before calling. */
 Student* searchStudent(int roll) {
     for (Student* c = head; c; c = c->next)
         if (c->rollNumber == roll)
@@ -166,38 +104,41 @@ Student* searchStudent(int roll) {
     return NULL;
 }
 
-/* Modify Student */
+/* Modify details: prompts for roll inside and uses validateRollPrompt */
 void modifyStudentDetails(void) {
-
     if (!head) {
         printf("No students to modify.\n");
         return;
     }
 
-    int roll = readInt("Enter roll number of student to modify: ");
+    printf("\n--- Before Modify ---\n");
+    displayStudents();
+
+    int roll = validateRollPrompt("Enter roll number to modify: ");
     Student* s = searchStudent(roll);
     if (!s) {
-        printf("Student with roll number %d not found.\n", roll);
+        printf("Student with roll %d not found.\n", roll);
         return;
     }
 
     printf("\nCurrent Details: Roll: %d | Name: %s\n", s->rollNumber, s->name);
     char newName[50];
     readNameAlpha("Enter new name (letters only): ", newName, sizeof(newName));
-    strcpy(s->name, newName);
+    strncpy(s->name, newName, sizeof(s->name)-1);
+    s->name[sizeof(s->name)-1] = '\0';
 
     printf("\nName updated successfully!\n");
-    printf("\n--- Updated Student List (After Modify) ---\n");
+    printf("\n--- After Modify ---\n");
     displayStudents();
 }
 
-/* Free All Memory */
+/* Free all student nodes */
 void freeAllMemory(void) {
-    Student* temp;
+    Student* t;
     while (head) {
-        temp = head;
+        t = head;
         head = head->next;
-        free(temp);
+        free(t);
     }
     head = NULL;
 }
